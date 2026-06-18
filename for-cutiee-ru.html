@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Для cutiee</title>
+<style>
+  /* ============================================================
+     "Для cutiee" — Russian version. Texts, not calls.
+     Lamplit-night / pomegranate-and-honey aesthetic.
+     Self-contained. No CDN, no external fonts. Works offline.
+     ============================================================ */
+  :root{
+    --bg0:#2a1014; --bg1:#150a0d; --bg2:#0d0608;
+    --cream:#f6e7d6; --cream-dim:#caa893;
+    --honey:#f4b860; --honey-bright:#ffd488;
+    --pom:#e2566c; --pom-deep:#bf3a52;
+    --glass:rgba(255,222,180,.06);
+    --glass-brd:rgba(255,210,160,.16);
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --sans:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',sans-serif;
+    --native:'Segoe UI',system-ui,'Noto Sans Armenian','Noto Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--sans);
+    color:var(--cream);
+    background:
+      radial-gradient(120% 90% at 50% -10%, #3a161c 0%, var(--bg0) 32%, var(--bg1) 66%, var(--bg2) 100%);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ---- atmosphere layers ---- */
+  #embers{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 100% at 50% 40%, transparent 55%, rgba(0,0,0,.55) 100%);}
+  #confetti{position:fixed;inset:0;z-index:50;pointer-events:none}
+
+  /* ---- stage & scenes ---- */
+  #stage{position:relative;z-index:2;height:100dvh;height:100vh}
+  .scene{
+    position:fixed;inset:0;z-index:2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;
+    padding:clamp(22px,7vw,40px);
+    opacity:0;visibility:hidden;transform:translateY(14px) scale(.99);
+    transition:opacity .8s ease, transform .8s ease, visibility .8s;
+    overflow-y:auto;
+  }
+  .scene.active{opacity:1;visibility:visible;transform:none}
+  .scene-inner{width:100%;max-width:460px;margin:auto;display:flex;flex-direction:column;align-items:center;gap:18px}
+
+  /* staggered reveal of children when scene becomes active */
+  .scene .reveal{opacity:0;transform:translateY(16px)}
+  .scene.active .reveal{animation:rise .85s cubic-bezier(.2,.7,.2,1) forwards}
+  .scene.active .reveal:nth-child(1){animation-delay:.12s}
+  .scene.active .reveal:nth-child(2){animation-delay:.26s}
+  .scene.active .reveal:nth-child(3){animation-delay:.40s}
+  .scene.active .reveal:nth-child(4){animation-delay:.54s}
+  .scene.active .reveal:nth-child(5){animation-delay:.68s}
+  .scene.active .reveal:nth-child(6){animation-delay:.82s}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  /* ---- typography ---- */
+  .kicker{font-family:var(--sans);text-transform:uppercase;letter-spacing:.32em;font-size:12px;
+    color:var(--honey);opacity:.85;font-weight:600}
+  h1{font-family:var(--serif);font-weight:600;line-height:1.05;letter-spacing:-.01em;
+    font-size:clamp(40px,13vw,72px)}
+  h2{font-family:var(--serif);font-weight:600;line-height:1.12;font-size:clamp(28px,8vw,40px)}
+  .lead{font-family:var(--serif);font-size:clamp(18px,5vw,22px);line-height:1.6;color:var(--cream)}
+  .body{font-size:clamp(15.5px,4.3vw,17px);line-height:1.72;color:var(--cream-dim)}
+  .script{font-family:var(--serif);font-style:italic}
+  .nick{font-family:var(--serif);font-style:italic;color:var(--honey-bright)}
+  .pom{color:var(--pom)}
+
+  /* ---- buttons ---- */
+  .btn{
+    font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:.02em;
+    color:#2a1014;cursor:pointer;border:none;border-radius:999px;
+    padding:14px 26px;margin-top:6px;
+    background:linear-gradient(180deg,var(--honey-bright),var(--honey));
+    box-shadow:0 0 0 1px rgba(255,255,255,.15) inset, 0 10px 30px -10px rgba(244,184,96,.7);
+    transition:transform .18s ease, box-shadow .25s ease, filter .2s;
+  }
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.05);box-shadow:0 0 0 1px rgba(255,255,255,.2) inset,0 16px 40px -12px rgba(244,184,96,.85)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn.ghost{background:transparent;color:var(--cream);box-shadow:0 0 0 1px var(--glass-brd) inset}
+  .btn.ghost:hover{box-shadow:0 0 0 1px var(--honey) inset;color:var(--honey-bright)}
+  .tap-hint{font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream-dim);opacity:.7;
+    animation:breathe 2.6s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.45}50%{opacity:.95}}
+
+  /* ---- the jar ---- */
+  .jar{position:relative;width:168px;height:204px;cursor:pointer;filter:drop-shadow(0 18px 30px rgba(0,0,0,.45))}
+  .jar .lid{position:absolute;top:0;left:50%;transform:translateX(-50%);width:96px;height:26px;border-radius:9px;
+    background:linear-gradient(180deg,#caa07a,#7c5a44);box-shadow:inset 0 2px 2px rgba(255,255,255,.25)}
+  .jar .neck{position:absolute;top:22px;left:50%;transform:translateX(-50%);width:78px;height:16px;
+    background:linear-gradient(180deg,rgba(255,225,190,.16),rgba(255,225,190,.06));border-radius:5px}
+  .jar .body{position:absolute;top:34px;left:50%;transform:translateX(-50%);width:150px;height:166px;
+    border-radius:26px 26px 34px 34px;
+    background:linear-gradient(160deg,rgba(255,235,205,.12),rgba(255,210,160,.05) 40%,rgba(120,70,60,.10));
+    box-shadow:inset 0 0 40px rgba(255,200,140,.16), inset 6px 0 18px rgba(255,255,255,.10), inset -10px 0 22px rgba(0,0,0,.25);
+    border:1px solid rgba(255,225,190,.18);overflow:hidden}
+  .jar .glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 70%,rgba(255,200,120,.28),transparent 62%);
+    animation:jarpulse 4s ease-in-out infinite}
+  @keyframes jarpulse{0%,100%{opacity:.7}50%{opacity:1}}
+  .mote{position:absolute;width:13px;height:13px;border-radius:50%;
+    background:radial-gradient(circle,#fff3d6,var(--honey) 55%,rgba(244,184,96,0) 72%);
+    box-shadow:0 0 12px 3px rgba(255,200,120,.6);cursor:pointer;transition:transform .25s, opacity .4s;
+    animation:float 5s ease-in-out infinite}
+  .mote:hover{transform:scale(1.35)}
+  .mote.opened{opacity:.28;animation:none}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .jar.shake{animation:shake .5s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px) rotate(-2deg)}75%{transform:translateX(5px) rotate(2deg)}}
+
+  /* ---- note modal ---- */
+  .overlay{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+    padding:28px;background:rgba(10,5,7,.55);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .3s}
+  .overlay.show{opacity:1;visibility:visible}
+  .note-card{width:100%;max-width:360px;background:linear-gradient(165deg,#fbe7c9,#f3d9a8);
+    color:#43251c;border-radius:16px;padding:30px 26px;text-align:center;
+    font-family:var(--serif);font-size:19px;line-height:1.55;
+    box-shadow:0 26px 60px -18px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,255,255,.4);
+    transform:translateY(18px) scale(.96) rotate(-1deg);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .overlay.show .note-card{transform:none}
+  .note-card .em{font-size:34px;display:block;margin-bottom:12px}
+  .note-card .close{margin-top:18px;font-family:var(--sans);font-size:12.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:#9a6b3e;cursor:pointer}
+
+  /* ---- quiz ---- */
+  .qcount{font-family:var(--sans);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--cream-dim)}
+  .flip{width:100%;max-width:380px;height:230px;perspective:1200px;cursor:pointer}
+  .flip-inner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+  .flip.flipped .flip-inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:26px;text-align:center;
+    border:1px solid var(--glass-brd);background:var(--glass);box-shadow:0 16px 40px -20px rgba(0,0,0,.7)}
+  .face.front{background:linear-gradient(165deg,rgba(255,225,180,.10),rgba(120,60,70,.10))}
+  .face.back{transform:rotateY(180deg);background:linear-gradient(165deg,rgba(226,86,108,.14),rgba(244,184,96,.10))}
+  .face .q{font-family:var(--serif);font-size:21px;line-height:1.35}
+  .face .a{font-family:var(--serif);font-size:19px;line-height:1.45;color:var(--cream)}
+  .face .mini{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-dim);opacity:.8}
+
+  /* ---- apology native lines ---- */
+  .native-line{font-family:var(--native);font-size:clamp(22px,6.4vw,28px);line-height:1.4;color:var(--honey-bright);font-weight:500}
+  .gloss{font-style:italic;font-family:var(--serif);font-size:14.5px;color:var(--cream-dim);margin-top:2px}
+  .rule{width:42px;height:1px;background:linear-gradient(90deg,transparent,var(--honey),transparent);margin:6px auto}
+
+  /* ---- why-you list ---- */
+  .why{list-style:none;display:flex;flex-direction:column;gap:14px;text-align:left;width:100%}
+  .why li{font-family:var(--serif);font-size:clamp(16.5px,4.6vw,19px);line-height:1.5;padding-left:26px;position:relative}
+  .why li::before{content:'';position:absolute;left:0;top:.62em;width:9px;height:9px;border-radius:50%;
+    background:radial-gradient(circle,#fff3d6,var(--pom) 60%);box-shadow:0 0 10px 2px rgba(226,86,108,.5)}
+
+  /* ---- finale ---- */
+  .finale-nick{font-family:var(--serif);font-style:italic;font-size:clamp(54px,18vw,96px);line-height:1;
+    background:linear-gradient(180deg,var(--honey-bright),var(--pom));-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 20px rgba(226,86,108,.35))}
+
+  /* ---- chrome: progress, back, sound ---- */
+  .progress{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:60;display:flex;gap:9px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--glass-brd);cursor:pointer;transition:.3s}
+  .dot.on{background:var(--honey);box-shadow:0 0 10px 1px rgba(244,184,96,.7);transform:scale(1.25)}
+  .corner{position:fixed;top:14px;z-index:60;width:40px;height:40px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--cream-dim);
+    background:var(--glass);border:1px solid var(--glass-brd);font-size:17px;transition:.25s;user-select:none}
+  .corner:hover{color:var(--honey-bright);border-color:var(--honey)}
+  #backBtn{left:14px;opacity:0;pointer-events:none;transition:opacity .3s}
+  #backBtn.show{opacity:1;pointer-events:auto}
+  #soundBtn{right:14px}
+
+  @media (prefers-reduced-motion: reduce){
+    .scene,.scene .reveal,.mote,.jar .glow{transition:none!important;animation:none!important}
+    .scene .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+  <canvas id="embers"></canvas>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+  <main id="stage"></main>
+  <canvas id="confetti"></canvas>
+
+  <div class="overlay" id="overlay">
+    <div class="note-card" id="noteCard">
+      <span class="em" id="noteEm">💛</span>
+      <div id="noteText"></div>
+      <div class="close" id="noteClose">нажми, чтобы закрыть</div>
+    </div>
+  </div>
+
+  <div class="corner" id="backBtn" aria-label="назад">‹</div>
+  <div class="corner" id="soundBtn" aria-label="звук">🔇</div>
+  <div class="progress" id="progress"></div>
+
+<script>
+/* ============================================================
+   CONTENT — русская версия. Редактируй здесь.
+   ============================================================ */
+const CONTENT = {
+  herName:  "Лилия",
+  nickname: "cutiee",
+
+  // СЦЕНА 1 — обложка
+  coverSub: "кое-что, что я сделал сам — вместо очередного ленивого «извини, занят 🥲»",
+
+  // СЦЕНА 2 — честное начало (сначала пусть улыбнётся)
+  hookKicker: "пока ты не закатила глаза",
+  hookTitle:  "Ладно. Я знаю.",
+  hookBody:   "Я пропал в своём ноутбуке и променял наши ночные переписки на работу, которая мне даже не ответила. Ты разозлилась. Справедливо. Так что это не просто сообщение — я собрал для тебя целую штуку. Листай, cutiee. 👉",
+
+  // СЦЕНА 3 — банка воспоминаний
+  jarIntro: "Наша банка глупых маленьких моментов.",
+  jarHint:  "нажимай на огоньки",
+  jarNotes: [
+    { em:"🥃", text:"В день знакомства мы собирались выпить водки. До сих пор не выпили. Та бутылка с нашими именами всё ещё ждёт, cutiee." },
+    { em:"👗", text:"Ты каждый день снимала мне свои образы, как личный подиум. Лучшее шоу в моём телефоне — без замечаний." },
+    { em:"🛍️", text:"Всё, что я ношу, выбрала ТЫ. Я носок не куплю без твоего одобрения. Мой стилист, мой модный диктатор." },
+    { em:"🚶‍♀️", text:"50 000 шагов в Армении. Рекорд, который я не побью никогда в жизни — и ты мне об этом ни за что не дашь забыть." },
+    { em:"💬", text:"Tandem. Ты учила английский, я коверкал русский. Пришёл за языком. Остался ради тебя." },
+    { em:"☕", text:"Дубай. Золотой кофе. Мы поклялись, что съездим. Я всё ещё жду — не отвертишься." }
+  ],
+
+  // СЦЕНА 4 — викторина (сердце всего)
+  quizIntro: "Думаешь, я тебя забыл? Сейчас проверим. 👀",
+  quizOutro: "видишь? ты у меня наизусть. как и всегда.",
+  quiz: [
+    { q:"За что cutiee вышла бы замуж, будь это законно?", a:"за суши. не заставляй её выбирать между мной и роллом с лососем — я проиграю." },
+    { q:"Её мировой рекорд, который мне НИКОГДА не побить?", a:"50 000 шагов. за один день. в Армении. я пытался. я провалился. ты напоминаешь мне об этом каждую неделю." },
+    { q:"Две вещи, которые она стёрла бы с лица земли?", a:"молоко и кошки. одно — гадость, от вторых ты чихаешь. и то, и другое для тебя в чёрном списке." },
+    { q:"Быстрый способ, чтобы cutiee возненавидела незнакомца?", a:"уснуть у неё в кресле в салоне. она принимает это лично — и правильно делает." }
+  ],
+
+  // СЦЕНА 5 — извинение (по-настоящему) + армянская строка
+  apologyKicker: "теперь серьёзно",
+  apologyTitle:  "Прости меня, cutiee.",
+  apologyBody:   "Я закрутился и позволил самым важным сообщениям затихнуть. Это моя вина — не твоя, никогда не твоя. Ты никогда не была «слишком». Просто я отвлёкся от единственного человека, который всегда был рядом. Это больше не повторится.",
+  // главная строка — эмоциональный пик
+  apologyRu:      "Я очень по тебе скучаю, моя родная.",
+  apologyRuGloss: "",
+  // армянская строка — про её корни. «джан» — тёплое армянское обращение.
+  apologyHy:      "Կարոտել եմ քեզ, Լիլի ջան։",
+  apologyHyGloss: "по-армянски: «я скучал по тебе, Лили джан»",
+
+  // СЦЕНА 6 — почему именно ты
+  whyTitle: "Почему именно ты",
+  why: [
+    "Ты меня одеваешь, кормишь суши, обходишь на 40 000 шагов — и как-то незаметно стала всем распорядком моей жизни.",
+    "Ты самый смешной человек, которого я знаю, и единственная, кто замечает, когда я вру, что «всё нормально».",
+    "«Лучшая подруга» — слишком маленькое слово, и ты это знаешь."
+  ],
+
+  // СЦЕНА 7 — финал + возврат в реальную жизнь (переписки, не звонки)
+  finaleLine:     "Та водка, что мы обещали друг другу в день знакомства? Всё ещё наша — однажды, в одном городе, мы её наконец разольём. 🥃 А пока — напиши мне, cutiee. Скучаю по нашим перепискам сильнее, чем признавался.",
+  finaleBtn:      "ну ладно 🙄💛",
+  finaleReaction: "так и знал. ты со мной застряла, cutiee. навсегда. 🤍"
+};
+
+/* ============================================================
+   ДВИЖОК — ниже менять не нужно.
+   ============================================================ */
+const C = CONTENT;
+const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
+const stage = document.getElementById('stage');
+
+/* ---- звук (синтез, без файлов) ---- */
+let actx=null, soundOn=false;
+function unlockAudio(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); soundOn=true; document.getElementById('soundBtn').textContent='🔊'; }catch(e){} }
+function chime(freq=523, dur=.5, type='sine', vol=.10){
+  if(!actx||!soundOn) return;
+  const o=actx.createOscillator(), g=actx.createGain();
+  o.type=type; o.frequency.value=freq; o.connect(g); g.connect(actx.destination);
+  const t=actx.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.02);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur); o.start(t); o.stop(t+dur);
+}
+document.getElementById('soundBtn').addEventListener('click',()=>{ if(!actx){unlockAudio();return;} soundOn=!soundOn; document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇'; });
+
+/* ---- банка (на обложке и в сцене воспоминаний) ---- */
+function buildJar(noteCount, interactive){
+  const jar=el(`<div class="jar"><div class="glow"></div><div class="lid"></div><div class="neck"></div><div class="body"></div></div>`);
+  const body=jar.querySelector('.body');
+  const spots=[[28,120],[64,150],[100,118],[46,86],[88,76],[120,150],[20,70]];
+  for(let i=0;i<noteCount;i++){
+    const m=el(`<div class="mote"></div>`);
+    const p=spots[i%spots.length];
+    m.style.left=p[0]+'px'; m.style.top=p[1]+'px';
+    m.style.animationDelay=(i*.4)+'s';
+    if(interactive) m.dataset.index=i;
+    body.appendChild(m);
+  }
+  return jar;
+}
+
+/* ---- всплывающая записка ---- */
+const overlay=document.getElementById('overlay');
+function openNote(note){
+  document.getElementById('noteEm').textContent=note.em;
+  document.getElementById('noteText').textContent=note.text;
+  overlay.classList.add('show'); chime(660,.5,'sine',.09);
+}
+function closeNote(){ overlay.classList.remove('show'); }
+overlay.addEventListener('click',(e)=>{ if(e.target===overlay||e.target.id==='noteClose') closeNote(); });
+
+/* ---- сцены ---- */
+function sceneCover(){
+  const s=el(`<section class="scene"><div class="scene-inner">
+    <div class="kicker reveal">только для тебя, ${C.nickname}</div>
+    <div class="reveal" id="coverJarWrap"></div>
+    <h1 class="reveal nick">${C.nickname}</h1>
+    <p class="body reveal" style="max-width:360px">${C.coverSub}</p>
+    <div class="tap-hint reveal">нажми на банку ✶</div>
+  </div></section>`);
+  const jar=buildJar(C.jarNotes.length,false);
+  jar.addEventListener('click',()=>{ jar.classList.add('shake'); chime(523,.4); setTimeout(()=>next(),360); });
+  s.querySelector('#coverJarWrap').appendChild(jar);
+  return s;
+}
+function sceneHook(){
+  return el(`<section class="scene"><div class="scene-inner">
+    <div class="kicker reveal">${C.hookKicker}</div>
+    <h2 class="reveal">${C.hookTitle}</h2>
+    <p class="body reveal">${C.hookBody}</p>
+    <button class="btn reveal" data-next>открыть банку →</button>
+  </div></section>`);
+}
+function sceneJar(){
+  const s=el(`<section class="scene"><div class="scene-inner">
+    <h2 class="reveal">${C.jarIntro}</h2>
+    <div class="reveal" id="jarWrap"></div>
+    <div class="tap-hint reveal" id="jarHint">${C.jarHint}</div>
+    <button class="btn ghost reveal" id="jarNext" style="opacity:.5;pointer-events:none">дальше →</button>
+  </div></section>`);
+  const jar=buildJar(C.jarNotes.length,true);
+  let opened=0; const total=C.jarNotes.length;
+  jar.querySelectorAll('.mote').forEach(m=>{
+    m.addEventListener('click',()=>{
+      const i=+m.dataset.index; openNote(C.jarNotes[i]);
+      if(!m.classList.contains('opened')){ m.classList.add('opened'); opened++;
+        if(opened>=total){ const b=s.querySelector('#jarNext'); b.style.opacity='1'; b.style.pointerEvents='auto'; b.classList.add('btn'); b.classList.remove('ghost'); s.querySelector('#jarHint').textContent='открыла все 💛'; }
+      }
+    });
+  });
+  s.querySelector('#jarWrap').appendChild(jar);
+  s.querySelector('#jarNext').addEventListener('click',()=>next());
+  return s;
+}
+function sceneQuiz(){
+  const s=el(`<section class="scene"><div class="scene-inner">
+    <div class="kicker reveal">проверка</div>
+    <p class="lead reveal">${C.quizIntro}</p>
+    <div class="qcount reveal" id="qcount"></div>
+    <div class="flip reveal" id="flip">
+      <div class="flip-inner">
+        <div class="face front"><div class="q" id="qFront"></div><div class="mini">нажми, чтобы перевернуть</div></div>
+        <div class="face back"><div class="a" id="qBack"></div></div>
+      </div>
+    </div>
+    <button class="btn reveal" id="qBtn" style="opacity:.5;pointer-events:none">показать ответ →</button>
+  </div></section>`);
+  let q=0, flipped=false;
+  const flip=s.querySelector('#flip'), btn=s.querySelector('#qBtn');
+  const render=()=>{
+    flip.classList.remove('flipped'); flipped=false;
+    s.querySelector('#qcount').textContent=`вопрос ${q+1} / ${C.quiz.length}`;
+    setTimeout(()=>{ s.querySelector('#qFront').textContent=C.quiz[q].q; s.querySelector('#qBack').textContent=C.quiz[q].a; },flipped?350:0);
+    btn.style.opacity='.5'; btn.style.pointerEvents='none'; btn.textContent='показать ответ →';
+  };
+  flip.addEventListener('click',()=>{
+    if(!flipped){ flip.classList.add('flipped'); flipped=true; chime(587,.45);
+      btn.style.opacity='1'; btn.style.pointerEvents='auto';
+      btn.textContent = (q===C.quiz.length-1)?'…ладно, это в точку →':'дальше →';
+    }
+  });
+  btn.addEventListener('click',()=>{
+    if(q<C.quiz.length-1){ q++; render(); }
+    else{ showQuizOutro(s); }
+  });
+  render();
+  return s;
+}
+function showQuizOutro(s){
+  const inner=s.querySelector('.scene-inner');
+  inner.innerHTML=`<h2 class="reveal script" style="color:var(--honey-bright)">${C.quizOutro}</h2>
+    <button class="btn reveal" data-next>я ещё не всё сказал →</button>`;
+  inner.classList.remove('done'); void inner.offsetWidth;
+  bindNext(inner); retrigger(s);
+}
+function sceneApology(){
+  return el(`<section class="scene"><div class="scene-inner">
+    <div class="kicker reveal">${C.apologyKicker}</div>
+    <h2 class="reveal">${C.apologyTitle}</h2>
+    <p class="body reveal">${C.apologyBody}</p>
+    <div class="rule reveal"></div>
+    <div class="reveal"><div class="native-line">${C.apologyRu}</div><div class="gloss">${C.apologyRuGloss}</div></div>
+    <div class="reveal"><div class="native-line">${C.apologyHy}</div><div class="gloss">${C.apologyHyGloss}</div></div>
+    <button class="btn reveal" data-next style="margin-top:14px">ещё одно →</button>
+  </div></section>`);
+}
+function sceneWhy(){
+  const items=C.why.map(w=>`<li>${w}</li>`).join('');
+  return el(`<section class="scene"><div class="scene-inner">
+    <h2 class="reveal">${C.whyTitle}</h2>
+    <ul class="why reveal">${items}</ul>
+    <button class="btn reveal" data-next>и последнее →</button>
+  </div></section>`);
+}
+function sceneFinale(){
+  const s=el(`<section class="scene"><div class="scene-inner">
+    <div class="kicker reveal">последнее, обещаю</div>
+    <div class="finale-nick reveal">${C.nickname}</div>
+    <p class="lead reveal" id="finaleText">${C.finaleLine}</p>
+    <button class="btn reveal" id="finaleBtn">${C.finaleBtn}</button>
+  </div></section>`);
+  s.querySelector('#finaleBtn').addEventListener('click',()=>{
+    burstConfetti(); chime(523,.5); setTimeout(()=>chime(659,.5),120); setTimeout(()=>chime(784,.7),240);
+    s.querySelector('#finaleText').textContent=C.finaleReaction;
+    const b=s.querySelector('#finaleBtn'); b.textContent='🤍'; b.style.pointerEvents='none';
+  });
+  return s;
+}
+
+/* ---- управление сценами ---- */
+const factories=[sceneCover,sceneHook,sceneJar,sceneQuiz,sceneApology,sceneWhy,sceneFinale];
+const scenes=factories.map(f=>{const sc=f();stage.appendChild(sc);return sc;});
+let idx=0;
+const progress=document.getElementById('progress');
+scenes.forEach((_,i)=>{const d=el(`<div class="dot"></div>`);d.addEventListener('click',()=>show(i));progress.appendChild(d);});
+const backBtn=document.getElementById('backBtn');
+backBtn.addEventListener('click',()=>{ if(idx>0) show(idx-1); });
+
+function retrigger(s){
+  s.querySelectorAll('.reveal').forEach(r=>{r.style.animation='none';void r.offsetWidth;r.style.animation='';});
+}
+function bindNext(root){ root.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>next())); }
+function show(i){
+  if(i===idx && scenes[i].classList.contains('active')) return;
+  scenes[idx]?.classList.remove('active');
+  idx=i; const s=scenes[idx]; s.classList.add('active'); retrigger(s);
+  closeNote();
+  progress.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('on',j===idx));
+  backBtn.classList.toggle('show',idx>0);
+}
+function next(){ if(idx<scenes.length-1) show(idx+1); }
+
+scenes.forEach(bindNext);
+document.body.addEventListener('pointerdown',()=>unlockAudio(),{once:true});
+show(0);
+
+/* ---- угольки (фон) ---- */
+(function(){
+  const cv=document.getElementById('embers'),x=cv.getContext('2d');
+  let w,h,parts,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){w=cv.width=innerWidth;h=cv.height=innerHeight;}
+  size();addEventListener('resize',size);
+  const N=reduce?0:Math.min(46,Math.round(innerWidth/22));
+  parts=Array.from({length:N},()=>spawn());
+  function spawn(){return{x:Math.random()*w,y:h+Math.random()*h,r:Math.random()*1.8+.6,
+    s:Math.random()*.5+.18,d:Math.random()*Math.PI*2,o:Math.random()*.5+.2};}
+  function tick(){
+    x.clearRect(0,0,w,h);
+    for(const p of parts){
+      p.y-=p.s; p.d+=.01; p.x+=Math.sin(p.d)*.25;
+      if(p.y<-10){Object.assign(p,spawn());p.y=h+10;}
+      x.globalAlpha=p.o; x.shadowBlur=8; x.shadowColor='rgba(255,200,120,.9)';
+      x.fillStyle='rgba(255,210,150,'+p.o+')'; x.beginPath(); x.arc(p.x,p.y,p.r,0,7); x.fill();
+    }
+    x.globalAlpha=1;x.shadowBlur=0;
+    if(N) requestAnimationFrame(tick);
+  }
+  if(N) tick();
+})();
+
+/* ---- конфетти (только финал) ---- */
+function burstConfetti(){
+  const cv=document.getElementById('confetti'),x=cv.getContext('2d');
+  let w=cv.width=innerWidth,h=cv.height=innerHeight;
+  const cols=['#ffd488','#f4b860','#e2566c','#bf3a52','#f6e7d6','#ff9ec4'];
+  const hearts=['💛','🤍','❤️'];
+  const P=Array.from({length:140},()=>({
+    x:Math.random()*w, y:-20-Math.random()*h*.4,
+    vx:(Math.random()-.5)*3, vy:Math.random()*3+2,
+    r:Math.random()*7+4, rot:Math.random()*6, vr:(Math.random()-.5)*.3,
+    c:cols[(Math.random()*cols.length)|0],
+    heart:Math.random()<.16?hearts[(Math.random()*hearts.length)|0]:null
+  }));
+  let t=0;
+  (function run(){
+    x.clearRect(0,0,w,h); t++;
+    for(const p of P){
+      p.x+=p.vx; p.y+=p.vy; p.vy+=.05; p.rot+=p.vr;
+      x.save(); x.translate(p.x,p.y); x.rotate(p.rot);
+      if(p.heart){ x.font=(p.r*2.4)+'px serif'; x.textAlign='center'; x.fillText(p.heart,0,0); }
+      else{ x.fillStyle=p.c; x.fillRect(-p.r/2,-p.r/2,p.r,p.r*.6); }
+      x.restore();
+    }
+    if(t<260) requestAnimationFrame(run); else x.clearRect(0,0,w,h);
+  })();
+}
+</script>
+</body>
+</html>
